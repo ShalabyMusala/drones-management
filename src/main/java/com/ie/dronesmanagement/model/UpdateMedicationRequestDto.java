@@ -16,7 +16,7 @@ public class UpdateMedicationRequestDto {
 	@Pattern(regexp = "^[a-zA-Z0-9_.-]*$")
 	private String name;
 
-	private Float weight;
+	private Integer weight;
 
 	@Pattern(regexp = "^[A-Z0-9_]{10}$")
 	private String code;

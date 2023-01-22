@@ -1,8 +1,8 @@
 package com.ie.dronesmanagement.entity;
 
 import java.util.List;
-import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -13,9 +13,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.Range;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -37,30 +38,33 @@ public class DroneEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
 	private Long id;
 
-	@GenericGenerator(name = "uuid", strategy = "uuid4")
+	@NotNull(message = "serial_number cannot be null or empty")
 	@Size(max = 100)
-	@Column(name = "serial_number")
-	private UUID serialNumber;
+	@Column(name = "serial_number", unique = true)
+	private String serialNumber;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "model")
 	private DroneModelEnum model;
 
+	@NotNull(message = "weight_limit cannot be null or empty")
 	@Column(name = "weight_limit")
-	private Float weightLimit;
+	@Max(value = 500)
+	private Integer weightLimit;
 
+	@NotNull(message = "battery_capacity cannot be null or empty")
 	@Range(min = 0, max = 100)
 	@Column(name = "battery_capacity")
-	private Float batteryCapacity;
+	private Integer batteryCapacity;
 
+	@NotNull(message = "state cannot be null or empty")
 	@Enumerated(EnumType.STRING)
 	@Column(name = "state")
 	private DroneStateEnum state;
 
-	@OneToMany(mappedBy = "drone", fetch = FetchType.EAGER)
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "drone", fetch = FetchType.EAGER)
 	@JsonManagedReference
 	private List<MedicationEntity> medications;
 }
