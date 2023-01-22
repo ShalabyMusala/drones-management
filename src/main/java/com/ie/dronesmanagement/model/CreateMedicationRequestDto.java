@@ -20,7 +20,7 @@ public class CreateMedicationRequestDto {
 	private String name;
 
 	@NotNull(message = "medication weight cannot be null")
-	private Float weight;
+	private Integer weight;
 
 	@Pattern(regexp = "^[A-Z0-9_]{10}$")
 	@NotBlank(message = "medication code cannot be null or empty")
