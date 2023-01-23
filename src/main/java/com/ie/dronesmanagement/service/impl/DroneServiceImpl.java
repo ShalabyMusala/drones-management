@@ -15,9 +15,12 @@ import com.ie.dronesmanagement.enums.DroneModelEnum;
 import com.ie.dronesmanagement.enums.DroneStateEnum;
 import com.ie.dronesmanagement.exception.BackendException;
 import com.ie.dronesmanagement.mapper.DroneMapper;
+import com.ie.dronesmanagement.mapper.MedicationMapper;
+import com.ie.dronesmanagement.model.BatteryCapacityResponse;
 import com.ie.dronesmanagement.model.CreateDroneRequestDto;
 import com.ie.dronesmanagement.model.DroneResponseDto;
 import com.ie.dronesmanagement.model.LoadDroneRequestDto;
+import com.ie.dronesmanagement.model.MedicationResponseDto;
 import com.ie.dronesmanagement.model.UpdateDroneRequestDto;
 import com.ie.dronesmanagement.repository.DroneRepository;
 import com.ie.dronesmanagement.repository.MedicationRepository;
@@ -32,13 +35,15 @@ public class DroneServiceImpl implements DroneService {
 	private final DroneRepository droneRepository;
 	private final MedicationRepository medicationRepository;
 	private final DroneMapper droneMapper;
+	private final MedicationMapper medicationMapper;
 
 	@Autowired
 	public DroneServiceImpl(DroneRepository droneRepository, MedicationRepository medicationRepository,
-			DroneMapper droneMapper) {
+			DroneMapper droneMapper, MedicationMapper medicationMapper) {
 		this.droneRepository = droneRepository;
 		this.medicationRepository = medicationRepository;
 		this.droneMapper = droneMapper;
+		this.medicationMapper = medicationMapper;
 	}
 
 	@Override
@@ -125,36 +130,93 @@ public class DroneServiceImpl implements DroneService {
 						Constants.DRONE_SERIAL_NUMBER_IS_NOT_FOUND_ERROR_CODE,
 						Constants.DRONE_SERIAL_NUMBER_IS_NOT_FOUND_ERROR_MESSAGE,
 						HttpStatus.UNPROCESSABLE_ENTITY.value()));
+
+		validateDroneStateAndBatterCapacity(droneEntity);
+
+		validateThatMedicationsDoesnotExceedWeightLimit(droneEntity.getWeightLimit(),
+				loadDroneRequestDto.getMedicationCodeList());
+
+		droneEntity.setState(DroneStateEnum.LOADING);
+		droneRepository.save(droneEntity);
+
+		loadDroneRequestDto.getMedicationCodeList().stream().forEach(medicationCode -> {
+			MedicationEntity medicationEntity = medicationRepository.findByCode(medicationCode)
+					.orElseThrow(() -> new BackendException(
+							Constants.MEDICATION_CODE_IS_NOT_FOUND_ERROR_MESSAGE + ":" + medicationCode,
+							Constants.MEDICATION_CODE_IS_NOT_FOUND_ERROR_CODE,
+							Constants.MEDICATION_CODE_IS_NOT_FOUND_ERROR_MESSAGE,
+							HttpStatus.UNPROCESSABLE_ENTITY.value()));
+
+			if (medicationEntity.getDrone() != null) {
+				throw new BackendException(
+						Constants.MEDICATION_IS_ALREADY_LOADED_BY_OTHER_DRONE_ERROR_MESSAGE + ":" + medicationCode,
+						Constants.MEDICATION_IS_ALREADY_LOADED_BY_OTHER_DRONE_ERROR_CODE,
+						Constants.MEDICATION_IS_ALREADY_LOADED_BY_OTHER_DRONE_ERROR_MESSAGE,
+						HttpStatus.UNPROCESSABLE_ENTITY.value());
+			}
+
+			medicationEntity.setDrone(droneEntity);
+			medicationRepository.save(medicationEntity);
+		});
+
+		droneEntity.setState(DroneStateEnum.LOADED);
+		droneRepository.save(droneEntity);
+
+		return droneMapper.toDroneResponseDto(droneEntity);
+	}
+
+	@Override
+	public BatteryCapacityResponse getDroneBatteryCapacity(String serialNumber) {
+		DroneEntity droneEntity = droneRepository.findBySerialNumber(serialNumber)
+				.orElseThrow(() -> new BackendException(Constants.DRONE_SERIAL_NUMBER_IS_NOT_FOUND_ERROR_MESSAGE,
+						Constants.DRONE_SERIAL_NUMBER_IS_NOT_FOUND_ERROR_CODE,
+						Constants.DRONE_SERIAL_NUMBER_IS_NOT_FOUND_ERROR_MESSAGE,
+						HttpStatus.UNPROCESSABLE_ENTITY.value()));
+		return new BatteryCapacityResponse(droneEntity.getBatteryCapacity());
+	}
+
+	@Override
+	public List<MedicationResponseDto> getLoadedMedications(String serialNumber) {
+		DroneEntity droneEntity = droneRepository.findBySerialNumber(serialNumber)
+				.orElseThrow(() -> new BackendException(Constants.DRONE_SERIAL_NUMBER_IS_NOT_FOUND_ERROR_MESSAGE,
+						Constants.DRONE_SERIAL_NUMBER_IS_NOT_FOUND_ERROR_CODE,
+						Constants.DRONE_SERIAL_NUMBER_IS_NOT_FOUND_ERROR_MESSAGE,
+						HttpStatus.UNPROCESSABLE_ENTITY.value()));
+		List<MedicationEntity> loadedMedications = droneEntity.getMedications();
+		if (loadedMedications.isEmpty()) {
+			throw new BackendException(Constants.DRONE_IS_NOT_LOADED_WITH_MEDICATIONS_ERROR_MESSAGE,
+					Constants.DRONE_IS_NOT_LOADED_WITH_MEDICATIONS_ERROR_CODE,
+					Constants.DRONE_IS_NOT_LOADED_WITH_MEDICATIONS_ERROR_MESSAGE,
+					HttpStatus.UNPROCESSABLE_ENTITY.value());
+		}
+		return medicationMapper.toMedicationResponseList(loadedMedications);
+	}
+
+	private void validateThatMedicationsDoesnotExceedWeightLimit(int droneWeightLimit,
+			List<String> medicationCodesToBeLoading) {
+		List<MedicationEntity> medicationEntityList = medicationRepository.findByCodeIn(medicationCodesToBeLoading);
+		int totalWeightToBeLoaded = medicationEntityList.stream().map(MedicationEntity::getWeight).reduce(0,
+				Integer::sum);
+		if (totalWeightToBeLoaded > droneWeightLimit) {
+			throw new BackendException(Constants.DRONE_HAS_EXCEEDED_THE_WEIGHT_LIMIT_ERROR_MESSAGE,
+					Constants.DRONE_HAS_EXCEEDED_THE_WEIGHT_LIMIT_ERROR_CODE,
+					Constants.DRONE_HAS_EXCEEDED_THE_WEIGHT_LIMIT_ERROR_MESSAGE,
+					HttpStatus.UNPROCESSABLE_ENTITY.value());
+		}
+	}
+
+	private void validateDroneStateAndBatterCapacity(DroneEntity droneEntity) {
 		if (!DroneStateEnum.IDLE.equals(droneEntity.getState())) {
 			throw new BackendException(Constants.DRONE_IS_NOT_AVAILABLE_FOR_LOADING_ERROR_MESSAGE,
 					Constants.DRONE_IS_NOT_AVAILABLE_FOR_LOADING_ERROR_CODE,
 					Constants.DRONE_IS_NOT_AVAILABLE_FOR_LOADING_ERROR_MESSAGE,
 					HttpStatus.UNPROCESSABLE_ENTITY.value());
 		}
-
-		loadDroneRequestDto.getMedicationCodeList().stream().forEach(medicationCode -> {
-			MedicationEntity medicationEntity = medicationRepository.findByCode(medicationCode)
-					.orElseThrow(() -> new BackendException(
-							Constants.MEDICATION_CODE_IS_NOT_FOUND_ERROR_CODE + ":" + medicationCode,
-							Constants.MEDICATION_CODE_IS_NOT_FOUND_ERROR_CODE,
-							Constants.MEDICATION_CODE_IS_NOT_FOUND_ERROR_MESSAGE,
-							HttpStatus.UNPROCESSABLE_ENTITY.value()));
-			if (medicationEntity.getDrone() != null) {
-				throw new BackendException(Constants.MEDICATION_IS_ALREADY_LOADED_BY_OTHER_DRONE_ERROR_MESSAGE + ":",
-						Constants.MEDICATION_IS_ALREADY_LOADED_BY_OTHER_DRONE_ERROR_CODE,
-						Constants.MEDICATION_IS_ALREADY_LOADED_BY_OTHER_DRONE_ERROR_MESSAGE,
-						HttpStatus.UNPROCESSABLE_ENTITY.value());
-			}
-			medicationEntity.setDrone(droneEntity);
-			medicationRepository.save(medicationEntity);
-		});
-		DroneEntity loadedDroneEntity = droneRepository.findBySerialNumber(serialNumber)
-				.orElseThrow(() -> new BackendException(Constants.DRONE_SERIAL_NUMBER_IS_NOT_FOUND_ERROR_MESSAGE,
-						Constants.DRONE_SERIAL_NUMBER_IS_NOT_FOUND_ERROR_CODE,
-						Constants.DRONE_SERIAL_NUMBER_IS_NOT_FOUND_ERROR_MESSAGE,
-						HttpStatus.UNPROCESSABLE_ENTITY.value()));
-
-		return droneMapper.toDroneResponseDto(loadedDroneEntity);
+		if (droneEntity.getBatteryCapacity() <= 25) {
+			throw new BackendException(Constants.DRONE_BATTER_CAPACITY_IS_BELOW_25_PERCENT_ERROR_MESSAGE,
+					Constants.DRONE_BATTER_CAPACITY_IS_BELOW_25_PERCENT_ERROR_CODE,
+					Constants.DRONE_BATTER_CAPACITY_IS_BELOW_25_PERCENT_ERROR_MESSAGE,
+					HttpStatus.UNPROCESSABLE_ENTITY.value());
+		}
 	}
-
 }

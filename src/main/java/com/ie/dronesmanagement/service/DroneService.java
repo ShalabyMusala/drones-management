@@ -3,9 +3,11 @@ package com.ie.dronesmanagement.service;
 import java.util.List;
 
 import com.ie.dronesmanagement.exception.BackendException;
+import com.ie.dronesmanagement.model.BatteryCapacityResponse;
 import com.ie.dronesmanagement.model.CreateDroneRequestDto;
 import com.ie.dronesmanagement.model.DroneResponseDto;
 import com.ie.dronesmanagement.model.LoadDroneRequestDto;
+import com.ie.dronesmanagement.model.MedicationResponseDto;
 import com.ie.dronesmanagement.model.UpdateDroneRequestDto;
 
 public interface DroneService {
@@ -24,4 +26,8 @@ public interface DroneService {
 	List<DroneResponseDto> getAvailableDronesForLoading();
 
 	DroneResponseDto loadDrone(String serialNumber, LoadDroneRequestDto loadDroneRequestDto);
+	
+	BatteryCapacityResponse getDroneBatteryCapacity(String serialNumber);
+	
+	List<MedicationResponseDto> getLoadedMedications(String serialNumber);
 }
