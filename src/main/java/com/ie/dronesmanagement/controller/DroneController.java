@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ie.dronesmanagement.exception.BackendException;
 import com.ie.dronesmanagement.model.APIResponse;
 import com.ie.dronesmanagement.model.APIResponseBuilder;
+import com.ie.dronesmanagement.model.BatteryCapacityResponse;
 import com.ie.dronesmanagement.model.CreateDroneRequestDto;
 import com.ie.dronesmanagement.model.DroneResponseDto;
 import com.ie.dronesmanagement.model.LoadDroneRequestDto;
+import com.ie.dronesmanagement.model.MedicationResponseDto;
 import com.ie.dronesmanagement.model.UpdateDroneRequestDto;
 import com.ie.dronesmanagement.service.DroneService;
 import com.ie.dronesmanagement.util.Constants;
@@ -95,4 +97,22 @@ public class DroneController {
 				.addMessage(Constants.SUCCESS_MESSAGE).reason(Constants.SUCCESS_MESSAGE).body(droneResponseDto).build();
 	}
 
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping(value = "${app.config.integration.drones-management.api.check-drone-battery-capacity}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public APIResponse<BatteryCapacityResponse> getDroneBatterCapacity(
+			@PathVariable("serialNumber") String serialNumber) {
+		BatteryCapacityResponse batteryCapacity = droneService.getDroneBatteryCapacity(serialNumber);
+		return new APIResponseBuilder<BatteryCapacityResponse>().code(Constants.SUCCESS_CODE)
+				.addMessage(Constants.SUCCESS_MESSAGE).reason(Constants.SUCCESS_MESSAGE).body(batteryCapacity).build();
+	}
+	
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping(value = "${app.config.integration.drones-management.api.get-drone-loaded-medications}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public APIResponse<List<MedicationResponseDto>> getDroneLoadedMedications(
+			@PathVariable("serialNumber") String serialNumber) {
+		List<MedicationResponseDto> loadedMedications = droneService.getLoadedMedications(serialNumber);
+		return new APIResponseBuilder<List<MedicationResponseDto>>().code(Constants.SUCCESS_CODE)
+				.addMessage(Constants.SUCCESS_MESSAGE).reason(Constants.SUCCESS_MESSAGE).body(loadedMedications).build();
+	}
+	
 }

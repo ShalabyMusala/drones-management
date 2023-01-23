@@ -10,4 +10,4 @@ spring:
     defer-datasource-initialization: true
   h2:    console:      enabled: true      logging:  level:    org:      springframework:        web: DEBUG      hibernate: ERROR      app:  config:    integration:      drones-management:        base-uri: /api/v1/drone-management        api:          medication: /medication
           medication-using-path-param-code: /medication/{code}          drone: /drone          drone-using-path-param-drone-serial-number: /drone/{serialNumber}
-          get-available-drones: /drone/available          load-drone-with-medication-items: /drone/{serialNumber}/load
+          get-available-drones: /drone/available          load-drone-with-medication-items: /drone/{serialNumber}/load          check-drone-battery-capacity: /drone/{serialNumber}/battery-capacity          get-drone-loaded-medications: /drone/{serialNumber}/medication

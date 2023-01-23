@@ -15,4 +15,5 @@ public interface DroneRepository extends JpaRepository<DroneEntity, Long> {
 	Long deleteBySerialNumber(String serialNumber);
 
 	List<DroneEntity> findByState(DroneStateEnum state);
+	
 }

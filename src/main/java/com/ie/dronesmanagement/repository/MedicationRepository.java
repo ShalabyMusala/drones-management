@@ -1,5 +1,6 @@
 package com.ie.dronesmanagement.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,6 @@ public interface MedicationRepository extends JpaRepository<MedicationEntity, Lo
 	Optional<MedicationEntity> findByCode(String code);
 
 	Long deleteByCode(String code);
+	
+	List<MedicationEntity> findByCodeIn(List<String> codeList);
 }
