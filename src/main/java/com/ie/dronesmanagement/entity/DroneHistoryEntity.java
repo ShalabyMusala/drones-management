@@ -51,5 +51,8 @@ public class DroneHistoryEntity {
 	private Integer batteryCapacity;
 
 	@Column(name = "drone_id")
-	private long droneId;
+	private Long droneId;
+
+	@Column(name = "drone_serial_number")
+	private String droneSerialNumber;
 }

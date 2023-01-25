@@ -20,12 +20,13 @@ public class DroneBatteryLevelScheduler {
 	@Autowired
 	private DroneRepository droneRepository;
 
-	@Scheduled(fixedDelay = 10000, initialDelay = 3000)
+	@Scheduled(fixedDelayString = "${app.config.integration.drones-management.config.scheduler-fixed-delay}", initialDelayString = "${app.config.integration.drones-management.config.scheduler-initial-delay}")
 	public void logDroneBatteryLevel() {
 		List<DroneEntity> droneEntityList = droneRepository.findAll();
 		droneEntityList.stream().forEach(drone -> {
 			DroneHistoryEntity droneHistoryEntity = new DroneHistoryEntity();
 			droneHistoryEntity.setDroneId(drone.getId());
+			droneHistoryEntity.setDroneSerialNumber(drone.getSerialNumber());
 			droneHistoryEntity.setBatteryCapacity(drone.getBatteryCapacity());
 			droneHistoryEntity.setState(drone.getState());
 			droneHistoryRepository.save(droneHistoryEntity);

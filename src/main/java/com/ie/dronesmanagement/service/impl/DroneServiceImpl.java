@@ -18,10 +18,12 @@ import com.ie.dronesmanagement.mapper.DroneMapper;
 import com.ie.dronesmanagement.mapper.MedicationMapper;
 import com.ie.dronesmanagement.model.BatteryCapacityResponse;
 import com.ie.dronesmanagement.model.CreateDroneRequestDto;
+import com.ie.dronesmanagement.model.DroneHistoryResponseDto;
 import com.ie.dronesmanagement.model.DroneResponseDto;
 import com.ie.dronesmanagement.model.LoadDroneRequestDto;
 import com.ie.dronesmanagement.model.MedicationResponseDto;
 import com.ie.dronesmanagement.model.UpdateDroneRequestDto;
+import com.ie.dronesmanagement.repository.DroneHistoryRepository;
 import com.ie.dronesmanagement.repository.DroneRepository;
 import com.ie.dronesmanagement.repository.MedicationRepository;
 import com.ie.dronesmanagement.service.DroneService;
@@ -36,12 +38,14 @@ public class DroneServiceImpl implements DroneService {
 	private final MedicationRepository medicationRepository;
 	private final DroneMapper droneMapper;
 	private final MedicationMapper medicationMapper;
+	private final DroneHistoryRepository droneHistoryRepository;
 
 	@Autowired
 	public DroneServiceImpl(DroneRepository droneRepository, MedicationRepository medicationRepository,
-			DroneMapper droneMapper, MedicationMapper medicationMapper) {
+			DroneHistoryRepository droneHistoryRepository, DroneMapper droneMapper, MedicationMapper medicationMapper) {
 		this.droneRepository = droneRepository;
 		this.medicationRepository = medicationRepository;
+		this.droneHistoryRepository = droneHistoryRepository;
 		this.droneMapper = droneMapper;
 		this.medicationMapper = medicationMapper;
 	}
@@ -190,6 +194,11 @@ public class DroneServiceImpl implements DroneService {
 					HttpStatus.UNPROCESSABLE_ENTITY.value());
 		}
 		return medicationMapper.toMedicationResponseList(loadedMedications);
+	}
+
+	@Override
+	public List<DroneHistoryResponseDto> getDroneBatteryStateHistory() {
+		return droneMapper.toDroneHistoryResponseDtoList(droneHistoryRepository.findAll());
 	}
 
 	private void validateThatMedicationsDoesnotExceedWeightLimit(int droneWeightLimit,
