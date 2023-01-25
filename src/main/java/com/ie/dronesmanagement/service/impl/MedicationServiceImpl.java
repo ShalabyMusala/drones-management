@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +53,7 @@ public class MedicationServiceImpl implements MedicationService {
 		try {
 			return medicationMapper.toMedicationResponseDto(medicationRepository
 					.save(medicationMapper.fromCreateMedicationRequestDto(createMedicationRequestDto)));
-		} catch (DuplicateKeyException ex) {
+		} catch (DataIntegrityViolationException ex) {
 			throw new BackendException(ex.getMessage(), Constants.MEDICATION_CODE_ALREADY_EXISTS_ERROR_CODE,
 					Constants.MEDICATION_CODE_ALREADY_EXISTS_ERROR_MESSAGE, HttpStatus.UNPROCESSABLE_ENTITY.value());
 		}
@@ -81,7 +81,7 @@ public class MedicationServiceImpl implements MedicationService {
 		}
 		try {
 			medicationRepository.save(medicationEntity);
-		} catch (DuplicateKeyException ex) {
+		} catch (DataIntegrityViolationException ex) {
 			throw new BackendException(ex.getMessage(), Constants.MEDICATION_CODE_ALREADY_EXISTS_ERROR_CODE,
 					Constants.MEDICATION_CODE_ALREADY_EXISTS_ERROR_MESSAGE, HttpStatus.UNPROCESSABLE_ENTITY.value());
 		}
