@@ -43,7 +43,7 @@ public class MedicationController {
 
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "${app.config.integration.drones-management.api.medication-using-path-param-code}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public APIResponse<MedicationResponseDto> getMedicationByMedicationId(@PathVariable("code") String code)
+	public APIResponse<MedicationResponseDto> getMedicationByMedicationCode(@PathVariable("code") String code)
 			throws BackendException {
 		MedicationResponseDto medicationResponseDto = medicationService.getMedicationByCode(code);
 		return new APIResponseBuilder<MedicationResponseDto>().code(Constants.SUCCESS_CODE)
