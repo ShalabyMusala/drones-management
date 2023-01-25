@@ -23,6 +23,7 @@ import com.ie.dronesmanagement.model.APIResponse;
 import com.ie.dronesmanagement.model.APIResponseBuilder;
 import com.ie.dronesmanagement.model.BatteryCapacityResponse;
 import com.ie.dronesmanagement.model.CreateDroneRequestDto;
+import com.ie.dronesmanagement.model.DroneHistoryResponseDto;
 import com.ie.dronesmanagement.model.DroneResponseDto;
 import com.ie.dronesmanagement.model.LoadDroneRequestDto;
 import com.ie.dronesmanagement.model.MedicationResponseDto;
@@ -105,14 +106,24 @@ public class DroneController {
 		return new APIResponseBuilder<BatteryCapacityResponse>().code(Constants.SUCCESS_CODE)
 				.addMessage(Constants.SUCCESS_MESSAGE).reason(Constants.SUCCESS_MESSAGE).body(batteryCapacity).build();
 	}
-	
+
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(value = "${app.config.integration.drones-management.api.get-drone-loaded-medications}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public APIResponse<List<MedicationResponseDto>> getDroneLoadedMedications(
 			@PathVariable("serialNumber") String serialNumber) {
 		List<MedicationResponseDto> loadedMedications = droneService.getLoadedMedications(serialNumber);
 		return new APIResponseBuilder<List<MedicationResponseDto>>().code(Constants.SUCCESS_CODE)
-				.addMessage(Constants.SUCCESS_MESSAGE).reason(Constants.SUCCESS_MESSAGE).body(loadedMedications).build();
+				.addMessage(Constants.SUCCESS_MESSAGE).reason(Constants.SUCCESS_MESSAGE).body(loadedMedications)
+				.build();
 	}
-	
+
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping(value = "${app.config.integration.drones-management.api.drone-history}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public APIResponse<List<DroneHistoryResponseDto>> getDroneHistory() {
+		List<DroneHistoryResponseDto> droneHistoryResponseDtos = droneService.getDroneBatteryStateHistory();
+		return new APIResponseBuilder<List<DroneHistoryResponseDto>>().code(Constants.SUCCESS_CODE)
+				.addMessage(Constants.SUCCESS_MESSAGE).reason(Constants.SUCCESS_MESSAGE).body(droneHistoryResponseDtos)
+				.build();
+	}
+
 }
