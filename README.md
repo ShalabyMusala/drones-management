@@ -38,7 +38,7 @@ curl --request PUT \
 * Update Drone (partially update any field of the drone)
 ```
 curl --request PATCH \
-  --url http://localhost:8090/api/v1/drone-management/drone/{serialNumber} \
+  --url http://localhost:8080/api/v1/drone-management/drone/{serialNumber} \
   --header 'Content-Type: application/json' \
   --data '{
 	"state": "LOADING"
@@ -47,32 +47,32 @@ curl --request PATCH \
 * Delete a drone
 ```
 curl --request DELETE \
-  --url http://localhost:8090/api/v1/drone-management/drone/{serialNumber}
+  --url http://localhost:8080/api/v1/drone-management/drone/{serialNumber}
 ```
 * Get Available Drones
 ```
 curl --request GET \
-  --url http://localhost:8090/api/v1/drone-management/drone/available
+  --url http://localhost:8080/api/v1/drone-management/drone/available
   ```
  * Get Drone by Serial Number
  ```
  curl --request GET \
-  --url http://localhost:8090/api/v1/drone-management/drone/{serialNumber}
+  --url http://localhost:8080/api/v1/drone-management/drone/{serialNumber}
  ```
  * Get Drone Battery Capacity
  ```
  curl --request GET \
-  --url http://localhost:8090/api/v1/drone-management/drone/{serialNumber}/battery-capacity
+  --url http://localhost:8080/api/v1/drone-management/drone/{serialNumber}/battery-capacity
  ```
  * Get Drone Loaded Medications
  ```
  curl --request GET \
-  --url http://localhost:8090/api/v1/drone-management/drone/{serialNumber}/medication
+  --url http://localhost:8080/api/v1/drone-management/drone/{serialNumber}/medication
 ```
 * Load Drone with Medications
 ```
 curl --request POST \
-  --url http://localhost:8090/api/v1/drone-management/drone/{serialNumber}/load \
+  --url http://localhost:8080/api/v1/drone-management/drone/{serialNumber}/load \
   --header 'Content-Type: application/json' \
   --data '{
 	"medicationCodeList":["DDDD_12345","AAAA_12345"]
@@ -88,19 +88,19 @@ curl --request GET \
 * Get All Medications
 ```
 curl --request GET \
-  --url http://localhost:8090/api/v1/drone-management/medication
+  --url http://localhost:8080/api/v1/drone-management/medication
 ```
 
 * Get Medication by Code
 ```
 curl --request GET \
-  --url http://localhost:8090/api/v1/drone-management/medication/{code}
+  --url http://localhost:8080/api/v1/drone-management/medication/{code}
 ```
 
 * Register Medication
 ```
 curl --request PUT \
-  --url http://localhost:8090/api/v1/drone-management/medication \
+  --url http://localhost:8080/api/v1/drone-management/medication \
   --header 'Content-Type: application/json' \
   --data '{
 	"name": "panthenol1sad",
@@ -111,7 +111,7 @@ curl --request PUT \
 * Update Medication
 ```
 curl --request PATCH \
-  --url http://localhost:8090/api/v1/drone-management/medication/{code} \
+  --url http://localhost:8080/api/v1/drone-management/medication/{code} \
   --header 'Content-Type: application/json' \
   --data '{
 	"name": "kinakomb",
@@ -122,7 +122,7 @@ curl --request PATCH \
 * Delete Drone
 ```
 curl --request DELETE \
-  --url http://localhost:8090/api/v1/drone-management/medication/{code}
+  --url http://localhost:8080/api/v1/drone-management/medication/{code}
 ```
 
 ## Error Codes
